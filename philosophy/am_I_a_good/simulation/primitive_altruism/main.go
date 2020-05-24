@@ -11,10 +11,41 @@ import (
 
 const (
 	requiredEnergy = 1000
+	amountOfPortions = 100
+	portionEnergy = 2000
 	tries = 1000
 	familySize = 100
 	extraFoodEfficiency = 1
 )
+
+type strategyShareEverything struct{}
+
+func (strategy *strategyShareEverything) HandleFood(
+	player *Player,
+	food *Food,
+) []Action {
+	var actions []Action
+
+	oneShare := food.Amount / uint(len(player.Family.Players))
+	for _, relative := range player.Family.Players {
+		actions = append(actions, Action{
+			ActionType:  ActionTypeEat,
+			Amount:      oneShare,
+			Destination: relative,
+		})
+	}
+
+	rest := food.Amount - oneShare * uint(len(player.Family.Players))
+	if rest > 0 {
+		actions = append(actions, Action{
+			ActionType:  ActionTypeEat,
+			Amount:      rest,
+			Destination: player,
+		})
+	}
+
+	return actions
+}
 
 type strategyEatTheRest struct{}
 
@@ -335,12 +366,15 @@ func (playground *Playground) IterateWeek() {
 	players := playground.Players()
 
 	var foundFood []*Food
-	for i := 0; i < 100; i++ {
-		foundFood = append(foundFood, &Food{false, 1510})
+	for i := 0; i < amountOfPortions; i++ {
+		foundFood = append(foundFood, &Food{false, portionEnergy})
 	}
 
 	newPlayerFood := make([][]*Food, len(players))
 	for playerIdx, player := range players {
+		if player.OwnsFood == 0 {
+			continue
+		}
 		newPlayerFood[playerIdx] = append(newPlayerFood[playerIdx], &Food{true, player.OwnsFood})
 		player.OwnsFood = 0
 	}
@@ -403,7 +437,7 @@ func (playground *Playground) IterateWeek() {
 }
 
 func main() {
-	var totalPopulation [2]uint64
+	var totalPopulation [3]uint64
 
 	go func() {
 		log.Fatal(http.ListenAndServe("127.0.0.1:6060", nil))
@@ -413,6 +447,7 @@ func main() {
 		playground := &Playground{}
 		playground.AddFamily(&strategyEatTheRest{}, familySize)
 		playground.AddFamily(&strategyShareAndHideTheRest{}, familySize)
+		playground.AddFamily(&strategyShareEverything{}, familySize)
 
 		for week := 0; week < 55; /* one year */ week++ {
 			playground.IterateWeek()
@@ -426,6 +461,6 @@ func main() {
 	for strategyIdx := 0; strategyIdx<len(totalPopulation); strategyIdx++ {
 		survived := totalPopulation[strategyIdx]
 		fmt.Printf("strategy #%d: sum of survived in %d tries: %d. Survival rate: %.0f%%\n",
-			strategyIdx, tries, survived, float64(survived)/float64(tries)/familySize*100)
+			strategyIdx+1, tries, survived, float64(survived)/float64(tries)/familySize*100)
 	}
 }
