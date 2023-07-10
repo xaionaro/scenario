@@ -1,0 +1,139 @@
+digraph chess {
+	opening [style=filled,fillcolor="#ffffff"]
+	middlegame [style=filled,fillcolor="#909090"]
+	endgame  [style=filled,fillcolor="#d0d0d0"]
+	win [style=filled,fillcolor=green]
+	opening -> middlegame -> endgame
+	opening -> endgame -> win
+	middlegame -> win
+	opening -> win
+	draw [style=filled,fillcolor=yellow]
+	opening -> draw
+	middlegame -> draw
+	endgame -> draw
+	lose [style=filled,fillcolor=red]
+	opening -> lose
+	middlegame -> lose
+	endgame -> lose
+	/*
+	subgraph cluster_opening {
+		label = "opening";
+		opening_entry [label="opening"]
+		opening_entry -> play_repertoire
+		opening_tradedown [label="trade down"]
+		opening_survive [label="survive"]
+		play_repertoire [label="play your repertoire:\nplay your mainlines,\nand when an opponent\ndeviates from it --\npunish them"]
+		play_repertoire -> opening_tradedown [label="punished\nthe opponent\nfor >=2 points"]
+		play_repertoire -> opening_survive [label="opponent\ngot advantage\n>2 points"]
+		play_repertoire -> play_repertoire [label="punished\nthe opponent\nfor <2 points"]
+		opening_to_middlegame [label="middlegame"]
+		play_repertoire -> opening_to_middlegame [label="everybody\nplayed the mainline"]
+	}
+	subgraph cluster_tradedown {
+		label = "trade down"
+
+		tradedown [label="trade down:\nevery fair trade\nis good for you"]
+		tradedown_declined [label="you have more\npositional\nfreedom; use it\nto get a better\nposition"]
+		tradedown -> tradedown_declined [label="opponent avoids\nfair trades"]
+		tradedown_endgame [label="endgame"]
+		tradedown -> tradedown_endgame [label="opponent accepts\ntrades"]
+		tradedown_middlegame [label="middlegame"]
+		tradedown_declined -> tradedown_middlegame [label="play middlegame\nbut with advantage in mind\nthat your opponent\nwill avoid trades\nso you can control the space\nand build-up an attack"]
+	}
+	subgraph cluster_equal {
+		label="equal game"
+
+		equal [label="equal game"]
+
+		equal_to_opening [label="opening"]
+		equal_to_middlegame [label="middlegame"]
+		equal_to_endgame [label="endgame"]
+
+		equal -> equal_to_opening [label="still memorized game"]
+		equal -> equal_to_middlegame [label="neither opening\nnor endgame"]
+		equal -> equal_to_endgame [label="less than 15 points of\nmaterial left on each side"]
+
+	}
+	subgraph cluster_survive {
+		label = "survive"
+
+		survive
+		survive_avoid_trades [label="avoid trades"]
+		survive_prefer_closed [label="prefer closed\npositions:\n\nit is easier to either\nforce draw\nand to force\nthe opponent to risk\nor sacrifice"]
+		survive_solidify [label="solidify\nyour position:\n\nplay more defense\nwait for a mistake\nfrom the opponent\nand punish"]
+		survive -> survive_avoid_trades -> survive
+		survive_prefer_closed -> survive
+		survive -> survive_solidify -> survive
+
+		survive_endgame [label="endgame"]
+		survive -> survive_endgame [label="gained\nno advantage\nand the opponent\nforced you\nto trade down"]
+		survive_chess [label="chess"]
+		survive -> survive_chess [label="mitigated\nopponent's\nadvantage"]
+	}
+	subgraph cluster_middlegame {
+		label = "middlegame"
+
+		middlegame_entry [label="middlegame"]
+		tactical_play [label="aggressive/tactical\nplay:\n\nattack&defend\nthe kind:\n\nbe fast to attack,\nand slowdown/block\nyour opponent:\n\nthis is a game\nof getting tempo\nadvantage,\nso that your\nopponent have\nno tempo to avoid\nmaterial loss"]
+		middlegame_entry -> tactical_play [label="weak opponent\nor a quick game\n(<rapid chess)"]
+
+		positional_play [label="positional/strategic/\nsolid play:\n\nblock the opponent\nand gradually build up\na positional advantage"]
+		middlegame_entry -> positional_play [label="strong opponent or\nenough time on clock"]
+
+		middlegame_chess [label="chess"]
+		middlegame_closed [label="closed game"]
+
+		tactical_play -> middlegame_chess
+		positional_play -> middlegame_chess [label="if you have\na >=2points\nadvantage or\nopponent's\nking is not\nwell hidden\nor if you have\na bishop pair\nadvantage"]
+		positional_play -> middlegame_closed [label="if the opponent\nhave a bishop\npair advantage\nor >=2 point advantage"]
+
+		middlegame_closed -> middlegame_chess
+	}
+
+	subgraph cluster_chess {
+		label = "chess (open game)"
+
+		chess [label="chess:\n\nattack&defense"]
+		chess_trappieces [label="trap pieces"]
+		chess_attack_king [label="attack\nthe kind"]
+		chess_defend_king [label="defend\nthe kind"]
+		chess_promote_pawns [label="promote\npawns"]
+		chess_control_the_space [label="control\nthe space"]
+		chess_improve_pawn_structure [label="improve\nthe pawn\nstructure"]
+		chess_activate_pieces [label="activate\npieces"]
+		chess_create_endgame_advantages [label="create\nendgame\nadvantages"]
+		chess -> chess_trappieces -> chess
+		chess -> chess_attack_king -> chess
+		chess -> chess_defend_king -> chess
+		chess -> chess_promote_pawns -> chess
+		chess -> chess_control_the_space -> chess
+		chess -> chess_improve_pawn_structure -> chess
+		chess -> chess_activate_pieces -> chess
+		chess -> chess_create_endgame_advantages -> chess
+
+		chess_tradedown [label="trade down"]
+		chess_survive [label="survive"]
+
+		chess -> chess_tradedown [label=">=2 points\nof advantage"]
+		chess -> chess_survive [label=">=2 points\nof disadvantage"]
+	}
+
+	subgraph cluster_closedgame {
+		label = "closed game"
+
+		closedgame [label="closed game"]
+
+		closedgame_pawnbreak [label="pawn break"]
+		closedgame_sacrifice [label="sacifice"]
+		closedgame_draw [label="draw\n(through repetition)"]
+		closedgame -> closedgame_pawnbreak [label="build up a\npositional\nadvantage\nas if board\nis open where\nyou can do a pawn\nbreak, and execute\nthe break"]
+		closedgame -> closedgame_sacrifice [label="if you have\nenough material\nor positional\nadvantage"]
+		closedgame -> closedgame_draw [label="if neither side\ncan build up\nan advantage"]
+
+		closedgame_to_opengame [label="open game"]
+		closedgame_pawnbreak -> closedgame_to_opengame
+		closedgame_sacrifice -> closedgame_to_opengame
+	}
+	*/
+}
+
